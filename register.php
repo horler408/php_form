@@ -3,35 +3,35 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" herf="./style.css" />
     <title>Register Page</title>
 </head>
 <?php
+    require_once 'connection.php';
     $msg = "";
 
     if($_SERVER['REQUEST_METHOD'] == 'POST') {
         $fname = $_POST['first_name'];
-        $lName = $_POST['last_name'];
+        $lname = $_POST['last_name'];
         $email = $_POST['email'];
         $pword = $_POST['password'];
-        $cpword = $_POST['confirm_password'];
 
-        $user_name = "root";
-        $password = "";
-        $database = "form_data";
-        $server = "localhost";
-        $db_handle = mysql_connect($server, $user_name, $password);
-        $db_found = mysql_select_db($database, $db_handle);
-        if ($db_found) {
-            $SQL = "INSERT INTO tb_form (first_name, last_name, email, password) VALUES ($fname,
-            $lName, $email, $pword)";
-            $result = mysql_query($SQL);
-            mysql_close($db_handle);
-            $msg = "Records added to the database"; 
-        }
+        // The Parameter data from connection file
+        $conn = new mysqli($server, $user_name, $password, $database);
+    
+        if ($conn->connect_error) die($msg = "Database NOT Found!");
+
+        $query = "INSERT INTO tb_form (first_name, last_name, email, password) VALUES ('$fname', '$lname', '$email', '$pword')";
+        //$query = "INSERT INTO tb_form (first_name, last_name, email, password) VALUES" ."('$fname', '$lname', '$email', '$pword')";
+        $result = $conn->query($query);
+
+        if(!$result) $msg = "Record Insert failed!";
         else {
-            $msg = "Database NOT Found ";
-            mysql_close($db_handle);
-        }
+            $msg = "Records added to the database"; 
+        } 
+
+        //$result->close();
+        $conn->close();
     }
 ?>
 <body>
@@ -61,8 +61,5 @@
             <button type="submit">Submit</button>
         </form>
     </div>
-
-
-
 </body>
 </html>
