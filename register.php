@@ -11,15 +11,19 @@
     $msg = "";
 
     if($_SERVER['REQUEST_METHOD'] == 'POST') {
+        // The Parameter data from connection file
+        $conn = new mysqli($server, $user_name, $password, $database);
+        if ($conn->connect_error) die($msg = "Database NOT Found!");
+
         $fname = $_POST['first_name'];
         $lname = $_POST['last_name'];
         $email = $_POST['email'];
         $pword = $_POST['password'];
 
-        // The Parameter data from connection file
-        $conn = new mysqli($server, $user_name, $password, $database);
-    
-        if ($conn->connect_error) die($msg = "Database NOT Found!");
+        $fname = mysql_entities_fix_string($conn, $fname);
+        $lname = mysql_entities_fix_string($conn, $lname);
+        $email = mysql_entities_fix_string($conn, $email);
+        $pword = mysql_entities_fix_string($conn, $pword);
 
         $query = "INSERT INTO tb_form (first_name, last_name, email, password) VALUES ('$fname', '$lname', '$email', '$pword')";
         //$query = "INSERT INTO tb_form (first_name, last_name, email, password) VALUES" ."('$fname', '$lname', '$email', '$pword')";
@@ -32,6 +36,17 @@
 
         //$result->close();
         $conn->close();
+    }
+
+    //Function to sanitise for both sql and scripting attack
+    function mysql_entities_fix_string($conn, $string){
+        return htmlentities(mysql_fix_string($conn, $string));
+    }
+    
+    //Function to remove sql attack
+    function mysql_fix_string($conn, $string){
+        if (get_magic_quotes_gpc()) $string = stripslashes($string);
+        return $conn->real_escape_string($string);
     }
 ?>
 <body>
