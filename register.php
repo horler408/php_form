@@ -24,8 +24,9 @@
         $lname = mysql_entities_fix_string($conn, $lname);
         $email = mysql_entities_fix_string($conn, $email);
         $pword = mysql_entities_fix_string($conn, $pword);
+        $hash = password_hash($pword, PASSWORD_DEFAULT);
 
-        $query = "INSERT INTO tb_form (first_name, last_name, email, password) VALUES ('$fname', '$lname', '$email', '$pword')";
+        $query = "INSERT INTO tb_form (first_name, last_name, email, password) VALUES ('$fname', '$lname', '$email', '$hash')";
         //$query = "INSERT INTO tb_form (first_name, last_name, email, password) VALUES" ."('$fname', '$lname', '$email', '$pword')";
         $result = $conn->query($query);
 
