@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" herf="./style.css" />
+    <link rel="stylesheet" href="./style.css" />
     <title>Register Page</title>
 </head>
 <?php
@@ -54,28 +54,34 @@
     <div class="container">
         <form method="POST" action="register.php">
         <div class="message"><?php print $msg ?></div>
-            <div>
+            <div class="input">
                 <label for="fName">First Name</label>
                 <input type="text" name="first_name" id="fName">
+                <small id="first-name-error" class="error-message"></small>
             </div>
-            <div>
+            <div class="input">
                 <label for="lName">Lastst Name</label>
                 <input type="text" name="last_name" id="lName">
+                <small id="last-name-error" class="error-message"></small>
             </div>
-            <div>
+            <div class="input">
                 <label for="email">Email</label>
                 <input type="email" name="email" id="email">
+                <small id="email-error" class="error-message"></small>
             </div>
-            <div>
-                <label for="pword">Password</label>
-                <input type="password" name="password" id="pword">
+            <div class="input">
+                <label for="password">Password</label>
+                <input type="password" name="password" id="password">
+                <small id="password-error" class="error-message"></small>
             </div>
-            <div>
-                <label for="cpword">Password</label>
-                <input type="password" name="confirm_password" id="cpword">
+            <div class="input">
+                <label for="confirm-password">Password</label>
+                <input type="password" name="confirm_password" id="confirm-password">
+                <small id="confirm-password-error" class="error-message"></small>
             </div>
             <button type="submit">Submit</button>
         </form>
     </div>
+    <script src="./app.js"></script>
 </body>
 </html>
