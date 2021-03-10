@@ -4,11 +4,14 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="./style.css">
     <title>Login Page</title>
 </head>
 <?php
+    session_start();
+
     require_once 'connection.php';
-    require 'functions.php';
+    require_once 'functions.php';
 
     $msg = "";
 
@@ -20,36 +23,46 @@
         $email = $_POST['email'];
         $pword = $_POST['password'];
 
-        //The function to sanitise the inputs comes from functions.php
-        if (isset($_POST['email']) && isset($_POST['password'])){
-            $em_temp = mysql_entities_fix_string($conn, $email);
-            $pw_temp = mysql_entities_fix_string($conn, $pword);
-
-            $query = "SELECT * FROM tb_form WHERE email='$em_temp'";
-            $result = $conn->query($query);
+        if(empty($email)){
+            header("Location: login.php?error=Email is required");
+            exit();
+        }else if(empty($pass)) {
+            header("Location: login.php?error=Password is required");
+            exit();
+        } else {
+            //The function to sanitise the inputs comes from functions.php
+            if (isset($_POST['email']) && isset($_POST['password'])){
+                $email = mysql_entities_fix_string($conn, $email);
+                $pass = mysql_entities_fix_string($conn, $pword);
     
-            if (!$result) die($msg = "User not found");
-            else if ($result->num_rows){
-                $row = $result->fetch_array(MYSQLI_NUM);
-                $result->close();
-    
-                if (password_verify($pw_temp, $row[3])) {
-                    session_start();
-                    $_SESSION['first_name'] = $row[1];
-                    $_SESSION['last_name'] = $row[2];
-                    echo htmlspecialchars("$row[1] $row[2] : Hi $row[0],
-                    you are now logged in as '$row[2]'");
-                    die ("<p><a href='dashboard.php'>Click here to continue</a></p>");
+                $query = "SELECT * FROM tb_form WHERE email='$email' && password = '$pass'";
+                $result = $conn->query($query);
+                //$result = mysqli_query($conn, $query);
+        
+                if (!$result) die($msg = "User not found");
+                else if ($result->num_rows){
+                    //$row = $result->fetch_array(MYSQLI_NUM);
+                    $row = mysqli_fetch_assoc($result);
+                    $result->close();
+        
+                    if (password_verify($pass, $row['password'])) {
+                        session_start();
+                        $_SESSION['first_name'] = $row['first_name'];
+                        $_SESSION['last_name'] = $row['last_name'];
+                        //echo htmlspecialchars("$row['first_name'] $row['last_name'] : Hi $row['id'], you are now logged in as '$row['last_name']'");
+                        die ("<p><a href='dashboard.php'>Click here to continue</a></p>");
+                    }
+                    else die("Invalid username/password combination");
                 }
-                else die("Invalid username/password combination");
+                else die("Invalid usernames/password combination");
             }
-            else die("Invalid username/password combination");
+            else{
+                header('WWW-Authenticate: Basic realm="Restricted Area"');
+                header('HTTP/1.0 401 Unauthorized');
+                die ("Please enter your username and password");
+            }
         }
-        else{
-            header('WWW-Authenticate: Basic realm="Restricted Area"');
-            header('HTTP/1.0 401 Unauthorized');
-            die ("Please enter your username and password");
-        }
+
     
         $conn->close();
     }
@@ -58,18 +71,25 @@
 <body>
     <div class="login-container">
     <form method="POST" action="login.php">
-        <pre>
-            <div class="message"><?php print $msg ?></div>
-            <div>
-                <label for="email">Email</label>
-                <input type="email" name="email" id="email">
-            </div>
-            <div>
-                <label for="pword">Password</label>
-                <input type="password" name="password" id="pword">
-            </div>
-            <button type="submit">Submit</button>
-        </pre>    
+        <h2>Login</h2>
+        <?php if(isset($_GET['error'])) { ?>
+            <p class="error"><?php echo $_GET['error'] ?></p>
+        <?php } ?>
+        <?php if(isset($_GET['msg'])) { ?>
+            <p class="success"><?php echo $_GET['msg'] ?></p>
+        <?php } ?>    
+
+        <div class="message"><?php print $msg ?></div>
+        <div class="input">
+            <label for="email">Email</label>
+            <input type="email" name="email" id="email">
+        </div>
+
+        <div class="input">
+            <label for="pword">Password</label>
+            <input type="password" name="password" id="pword">
+        </div>
+        <button type="submit">Submit</button>  
     </form>
     </div>
 </body>

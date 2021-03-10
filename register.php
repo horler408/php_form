@@ -27,31 +27,36 @@
         $pword = mysql_entities_fix_string($conn, $pword);
         $hash = password_hash($pword, PASSWORD_DEFAULT);
 
-        //Checking if Email exists
-        $query = "SELECT * FROM users";
+        if(empty($fname)){
+            header("Location: register.php?error=First Name is required");
+            exit();
+        }else if(empty($lname)){
+            header("Location: register.php?error=Last Name is required");
+            exit();
+        }else if(empty($email)){
+            header("Location: register.php?error=Email is required");
+            exit();
+        }else if(empty($pass)) {
+            header("Location: register.php?error=Password is required");
+            exit();
+        }else if(empty($fname)){
+            header("Location: register.php?error=First Name is required");
+            exit();
+        }else if(empty($lname)){
+            header("Location: register.php?error=Last Name is required");
+            exit();
+        }
+        else {
 
-        $result = $conn->query($query);
-        if (!$result) die($conn->error);
-
-        $rows = $result->num_rows;
-        
-        for ($i = 0 ; $i < $rows ; ++$i){
-            $result->data_seek($i);
-            if($result->fetch_assoc()['email'] === $email){
-                $msg = "Email already exists";
-                exit();
-            }else {
-                $query = "INSERT INTO tb_form (first_name, last_name, email, password) VALUES ('$fname', '$lname', '$email', '$hash')";
-                //$query = "INSERT INTO tb_form (first_name, last_name, email, password) VALUES" ."('$fname', '$lname', '$email', '$pword')";
-                $result = $conn->query($query);
-
-                if(!$result) $msg = "Record Insert failed!";
-                else {
-                    $msg = "Records added to the database"; 
-                } 
-                    }
-                }
-        //Checking ends here
+            $query = "INSERT INTO tb_form (first_name, last_name, email, password) VALUES ('$fname', '$lname', '$email', '$hash')";
+            //$query = "INSERT INTO tb_form (first_name, last_name, email, password) VALUES" ."('$fname', '$lname', '$email', '$pword')";
+            $result = $conn->query($query);
+    
+            if(!$result) $msg = "Record Insert failed!";
+            else {
+                $msg = "Records added to the database"; 
+            } 
+        }
 
         //$result->close();
         $conn->close();
@@ -60,7 +65,14 @@
 <body>
     <div class="container">
         <form method="POST" action="register.php">
-        <div class="message"><?php print $msg ?></div>
+        <h2>Register</h2>
+            <?php if(isset($_GET['error'])) { ?>
+            <p class="error"><?php echo $_GET['error'] ?></p>
+            <?php } ?>
+            <?php if(isset($_GET['msg'])) { ?>
+                <p class="success"><?php echo $_GET['msg'] ?></p>
+            <?php } ?>
+            
             <div class="input">
                 <label for="fName">First Name</label>
                 <input type="text" name="first_name" id="fName">
