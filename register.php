@@ -8,6 +8,7 @@
 </head>
 <?php
     require_once 'connection.php';
+    require 'functions.php';
     $msg = "";
 
     if($_SERVER['REQUEST_METHOD'] == 'POST') {
@@ -26,28 +27,34 @@
         $pword = mysql_entities_fix_string($conn, $pword);
         $hash = password_hash($pword, PASSWORD_DEFAULT);
 
-        $query = "INSERT INTO tb_form (first_name, last_name, email, password) VALUES ('$fname', '$lname', '$email', '$hash')";
-        //$query = "INSERT INTO tb_form (first_name, last_name, email, password) VALUES" ."('$fname', '$lname', '$email', '$pword')";
-        $result = $conn->query($query);
+        //Checking if Email exists
+        $query = "SELECT * FROM users";
 
-        if(!$result) $msg = "Record Insert failed!";
-        else {
-            $msg = "Records added to the database"; 
-        } 
+        $result = $conn->query($query);
+        if (!$result) die($conn->error);
+
+        $rows = $result->num_rows;
+        
+        for ($i = 0 ; $i < $rows ; ++$i){
+            $result->data_seek($i);
+            if($result->fetch_assoc()['email'] === $email){
+                $msg = "Email already exists";
+                exit();
+            }else {
+                $query = "INSERT INTO tb_form (first_name, last_name, email, password) VALUES ('$fname', '$lname', '$email', '$hash')";
+                //$query = "INSERT INTO tb_form (first_name, last_name, email, password) VALUES" ."('$fname', '$lname', '$email', '$pword')";
+                $result = $conn->query($query);
+
+                if(!$result) $msg = "Record Insert failed!";
+                else {
+                    $msg = "Records added to the database"; 
+                } 
+                    }
+                }
+        //Checking ends here
 
         //$result->close();
         $conn->close();
-    }
-
-    //Function to sanitise for both sql and scripting attack
-    function mysql_entities_fix_string($conn, $string){
-        return htmlentities(mysql_fix_string($conn, $string));
-    }
-    
-    //Function to remove sql attack
-    function mysql_fix_string($conn, $string){
-        if (get_magic_quotes_gpc()) $string = stripslashes($string);
-        return $conn->real_escape_string($string);
     }
 ?>
 <body>
