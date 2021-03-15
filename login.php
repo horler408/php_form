@@ -26,7 +26,7 @@
         if(empty($email)){
             header("Location: login.php?error=Email is required");
             exit();
-        }else if(empty($pass)) {
+        }else if(empty($pword)) {
             header("Location: login.php?error=Password is required");
             exit();
         } else {
@@ -35,26 +35,28 @@
                 $email = mysql_entities_fix_string($conn, $email);
                 $pass = mysql_entities_fix_string($conn, $pword);
     
-                $query = "SELECT * FROM tb_form WHERE email='$email' && password = '$pass'";
+                $query = "SELECT * FROM tb_form WHERE email='$email'";
                 $result = $conn->query($query);
-                //$result = mysqli_query($conn, $query);
         
                 if (!$result) die($msg = "User not found");
                 else if ($result->num_rows){
-                    //$row = $result->fetch_array(MYSQLI_NUM);
                     $row = mysqli_fetch_assoc($result);
                     $result->close();
         
                     if (password_verify($pass, $row['password'])) {
-                        session_start();
                         $_SESSION['first_name'] = $row['first_name'];
                         $_SESSION['last_name'] = $row['last_name'];
-                        //echo htmlspecialchars("$row['first_name'] $row['last_name'] : Hi $row['id'], you are now logged in as '$row['last_name']'");
                         die ("<p><a href='dashboard.php'>Click here to continue</a></p>");
                     }
-                    else die("Invalid username/password combination");
+                    else {
+                        header("Location: login.php?error=Invalid email/password");
+                        exit();
+                    }
                 }
-                else die("Invalid usernames/password combination");
+                else {
+                    header("Location: login.php?error=Incorrect email/password");
+                    exit();
+                }
             }
             else{
                 header('WWW-Authenticate: Basic realm="Restricted Area"');
@@ -62,7 +64,6 @@
                 die ("Please enter your username and password");
             }
         }
-
     
         $conn->close();
     }

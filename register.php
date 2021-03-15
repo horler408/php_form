@@ -48,17 +48,31 @@
         }
         else {
 
-            $query = "INSERT INTO tb_form (first_name, last_name, email, password) VALUES ('$fname', '$lname', '$email', '$hash')";
-            //$query = "INSERT INTO tb_form (first_name, last_name, email, password) VALUES" ."('$fname', '$lname', '$email', '$pword')";
-            $result = $conn->query($query);
+            //Checking if Email exists
+            $query = "SELECT email FROM tb_form WHERE email = '$email'";
     
-            if(!$result) $msg = "Record Insert failed!";
-            else {
-                $msg = "Records added to the database"; 
-            } 
+            $res = $conn->query($query);
+
+            if (!$res) die($conn->error);
+    
+            $rows = $res->num_rows;
+
+            if($rows > 0) {
+                $msg = "Email already exists";
+                //exit();
+            }else {
+                $sql = "INSERT INTO tb_form (first_name, last_name, email, password) VALUES ('$fname', '$lname', '$email', '$hash')";
+                $result = $conn->query($sql);
+        
+                if(!$result) $msg = "Record Insert failed!";
+                else {
+                    $msg = "Records added to the database"; 
+                }
+            }
+ 
         }
 
-        //$result->close();
+        $res->close();
         $conn->close();
     }
 ?>
@@ -72,6 +86,7 @@
             <?php if(isset($_GET['msg'])) { ?>
                 <p class="success"><?php echo $_GET['msg'] ?></p>
             <?php } ?>
+            <div class="message"><?php print $msg ?></div>
             
             <div class="input">
                 <label for="fName">First Name</label>
